@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+sqlalchemy
+python-multipart
+python-jose[cryptography]
+passlib[bcrypt]
+streamlit
+streamlit-webrtc
+mcp
+faster-whisper
+ollama
+requests
+pandas
+watchdog
+streamlit-calendar
