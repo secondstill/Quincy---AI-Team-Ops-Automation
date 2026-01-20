@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+
+# Database
+*.db
+*.sqlite3
+
+# Audio/Large Data
+data/*.wav
+data/*.mp3
+data/*.m4a
+
+# Node.js
+node_modules/
+.next/
+out/
+build/
+.env*
+
+# OS
+.DS_Store
+Thumbs.db

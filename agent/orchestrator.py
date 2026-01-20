@@ -86,15 +86,22 @@ def process_meeting(meeting_id: int):
             existing_summary.content = summary_text
             
         # Tasks
-        tasks_data = ls.extract_tasks(transcript_text)
+        # Fetch valid users for smart assignment
+        all_users = db.query(User).all()
+        valid_users = [{"username": u.username, "full_name": u.full_name} for u in all_users]
+        
+        tasks_data = ls.extract_tasks(transcript_text, valid_users=valid_users)
         
         logger.info(f"Step 3/3: Mapping {len(tasks_data)} tasks to users...")
         for task_item in tasks_data:
-            assignee_name = task_item.get("assignee", "Unassigned")
-            assigned_user = find_user_by_name(db, assignee_name)
+            assignee_username = task_item.get("assignee", "Unassigned")
+            
+            # Find User object by exact username match (since LLM is now instructed to use username)
+            assigned_user = db.query(User).filter(User.username == assignee_username).first()
+            # If not found (or Unassigned), assigned_user is None
             
             user_id = assigned_user.id if assigned_user else None
-            log_msg = f"Task: '{task_item.get('title')}' -> Assignee: '{assignee_name}' -> UserID: {user_id}"
+            log_msg = f"Task: '{task_item.get('title')}' -> Assignee: '{assignee_username}' -> UserID: {user_id}"
             logger.info(log_msg)
 
             new_task = Task(

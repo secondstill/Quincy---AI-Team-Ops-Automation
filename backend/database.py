@@ -1,9 +1,9 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Text, Enum
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Text, Enum, Table
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship
 import datetime
 import enum
 
-DATABASE_URL = "sqlite:///./data/quincy.db"
+DATABASE_URL = "sqlite:///./data/quincy_v2.db"
 
 Base = declarative_base()
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
@@ -19,6 +19,11 @@ class TaskStatus(str, enum.Enum):
     REVIEW = "review"
     COMPLETED = "completed"
 
+meeting_participants = Table('meeting_participants', Base.metadata,
+    Column('meeting_id', Integer, ForeignKey('meetings.id')),
+    Column('user_id', Integer, ForeignKey('users.id'))
+)
+
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
@@ -26,6 +31,8 @@ class User(Base):
     hashed_password = Column(String)
     full_name = Column(String)
     role = Column(String, default=UserRole.EMPLOYEE)
+
+    meetings = relationship("Meeting", secondary=meeting_participants, back_populates="participants")
 
 class Meeting(Base):
     __tablename__ = "meetings"
@@ -38,6 +45,7 @@ class Meeting(Base):
     transcript = relationship("Transcript", back_populates="meeting", uselist=False)
     summary = relationship("Summary", back_populates="meeting", uselist=False)
     tasks = relationship("Task", back_populates="meeting")
+    participants = relationship("User", secondary=meeting_participants, back_populates="meetings")
 
 class Transcript(Base):
     __tablename__ = "transcripts"

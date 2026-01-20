@@ -34,10 +34,16 @@ class LLMService:
         """
         return self._generate(prompt)
 
-    def extract_tasks(self, text: str):
+    def extract_tasks(self, text: str, valid_users: list = None):
+        user_instruction = ""
+        if valid_users:
+            users_str = ", ".join([f"{u['username']} ({u['full_name']})" for u in valid_users])
+            user_instruction = f"Valid assignees are: {users_str}. Map any mentioned names to the closest matching 'username' from this list. If no match is found or the person is not in the list, use 'Unassigned'."
+
         prompt = f"""
         You are an expert project manager. Extract actionable tasks from the following meeting transcript.
-        Return the result ONLY as a JSON array of objects, where each object has "title", "assignee" (if mentioned, else "Unassigned"), and "priority" (High/Medium/Low).
+        Return the result ONLY as a JSON array of objects, where each object has "title", "assignee" (username from valid list or "Unassigned"), and "priority" (High/Medium/Low).
+        {user_instruction}
         Do not include any markdown formatting or extra text. Just the JSON array.
         
         Transcript:
